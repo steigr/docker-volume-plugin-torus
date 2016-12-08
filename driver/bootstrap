@@ -1,0 +1,19 @@
+#!/bin/sh
+
+[[ -S /host/var/run/docker.sock ]] && export DOCKER_HOST=unix:///host/var/run/docker.sock
+
+container=$(cat /proc/1/cgroup  | sort -n | tail -1  | xargs -r basename)
+image=$(docker inspect --format='{{.Config.Image}}' $container)
+name=$(docker inspect --format='{{.Name}}' $container  | xargs -r basename).mounter
+export mounter=$(docker inspect --format='{{.Id}}' $name || true)
+
+docker ps --filter=label=torus.role=mounter --quiet --no-trunc | grep -v -e $container ${mounter:+-e $mounter} | xargs -r docker rm -f >/dev/null 2>&1
+
+if [[ -z $mounter ]] || [[ $(docker inspect --format='{{.State.Pid}}' $mounter) -eq 0 ]]; then
+  start-stop-daemon -S -x $(which docker) -b -- run --privileged --rm --env=TINI_SUBREAPER=true --net=container:$container --pid=host --volume=/:/host --entrypoint=/bin/tini --name=$name --label=torus.role=mounter $image pause
+  until docker inspect $name >/dev/null 2>/dev/null </dev/null; do
+    sleep .1
+  done
+fi
+
+export mounter=$(docker inspect --format='{{.Id}}' $name || true)

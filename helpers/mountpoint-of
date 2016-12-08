@@ -1,0 +1,2 @@
+#!/bin/sh
+in-parent grep $MOUNTS/$1 /proc/mounts | awk '{print $2}'

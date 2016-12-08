@@ -1,0 +1,2 @@
+#!/bin/sh
+privileged-container blkid | grep "/nbd" | cut -f1 -d: | xargs -r -n1 basename

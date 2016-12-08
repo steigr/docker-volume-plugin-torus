@@ -1,0 +1,23 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+trap "printf '{ \"Err\": \"%s does not exist \"}\n' ${VOLUMEDRIVER_NAME}" exit
+
+_get() {
+torusctl --etcd=${TORUS_ETCD} volume list \
+| while read -r line; do \
+  echo $line; \
+done \
+| grep -v "^VOLUME NAME SIZE TYPE$" \
+| awk '{print $1}' \
+| grep "^$VOLUMEDRIVER_NAME$" \
+| while read volname; do \
+  printf '{"Name":"%s","Mountpoint":"%s","Status":%s}\n' "$volname" "$(mountpoint-of $volname)" "$(status-of $volname)"; \
+done \
+| paste -s -d, - \
+| sed -e 's/^/{"Volume":/' -e 's/$/}/'
+}
+
+OUTPUT=$(_get)
+trap - exit
+echo $OUTPUT

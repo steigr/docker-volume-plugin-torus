@@ -1,0 +1,16 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+trap 'printf "{ \"Err\": \"%s cannot be unmounted: %s\"}" "${VOLUMEDRIVER_NAME}" "${ERROR}"' exit
+
+export NS_PPID=${NS_PPID:-$(container-parent-pid)}
+export NBD=${NBD:-$(device-of $VOLUMEDRIVER_NAME)}
+
+_unmount() {
+  [[ "$NBD" ]] || return 0
+  ERROR=$(in-parent umount $MOUNTS/$VOLUMEDRIVER_NAME 2>&1 | tr '\n' ' ')
+}
+
+_unmount >&2
+trap - exit
+echo '{}'

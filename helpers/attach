@@ -1,0 +1,7 @@
+#!/bin/sh
+
+_attach() {
+  exec privileged-container start-stop-daemon -S -x $(command -v torusblk) -m -p /torusblk.$1.pid -b -- --etcd=$TORUS_ETCD nbd $1 $2
+}
+
+[[ "$(device-of $1)" ]] || _attach $1 $2

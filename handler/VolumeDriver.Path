@@ -1,0 +1,14 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+trap "printf '{ \"Err\": \"%s is not mounted!\"}\n' ${VOLUMEDRIVER_NAME}" exit
+
+export NS_PPID=${NS_PPID:-$(container-parent-pid)}
+
+_path() {
+  mountpoint-of $VOLUMEDRIVER_NAME
+}
+
+OUTPUT=$(_path)
+trap - exit
+printf '{ "Mountpoint":"%s"}\n' "$OUTPUT"

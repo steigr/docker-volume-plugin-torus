@@ -1,0 +1,4 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+echo '{ "Capabilities": { "Scope": "global" } }'

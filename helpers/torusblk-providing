@@ -1,0 +1,5 @@
+#!/bin/sh
+
+privileged-container pidof torusblk | while read pid; do
+  privileged-container find /proc/$pid/fd -exec readlink '{}' ';' | grep -q "$1" && echo $pid
+done

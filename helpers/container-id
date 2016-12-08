@@ -1,0 +1,3 @@
+#!/bin/sh
+
+privileged-container sh -c 'exec cat /proc/$$/cgroup' | sort -n | tail -1 | xargs -n1 -r basename

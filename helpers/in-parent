@@ -1,0 +1,4 @@
+#!/bin/sh
+
+NS_PPID=${NS_PPID:-$(container-parent-pid)}
+privileged-container nsenter --mount=/proc/$NS_PPID/ns/mnt -F -- "$@"

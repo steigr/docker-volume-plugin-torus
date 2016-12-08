@@ -1,0 +1,20 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+trap 'printf "{ \"Err\": \"creation of %s failed: %s \"}" "${VOLUMEDRIVER_NAME}" "${ERROR}"' exit
+
+export NS_PPID=${NS_PPID:-$(container-parent-pid)}
+export NBD=${NBD:-/dev/$(next-free-nbd)}
+
+_create() {
+ERROR=$(torusctl --etcd=${TORUS_ETCD} volume create-block ${VOLUMEDRIVER_NAME} ${VOLUMEDRIVER_OPTS_SIZE:-1GiB} 2>&1 | tr '\n' ' ')
+
+ERROR=$(attach $VOLUMEDRIVER_NAME $NBD 2>&1 | tr '\n' ' ')
+sleep 2
+
+in-parent mkfs.${VOLUMEDRIVER_OPTS_FSTYPE:-xfs} ${VOLUMEDRIVER_OPTS_CREATEARGS} $NBD
+}
+
+_create >&2
+printf '{}\n'
+trap - exit

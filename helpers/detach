@@ -1,0 +1,8 @@
+#!/bin/sh
+
+_detach() {
+  in-parent umount $MOUNTS/$1 || true
+  privileged-container start-stop-daemon -K -x $(command -v torusblk) -p /torusblk.$1.pid -- --etcd=$TORUS_ETCD nbd $1 $2
+}
+
+[[ -z "$(device-of $1)" ]] || _detach $1 $2

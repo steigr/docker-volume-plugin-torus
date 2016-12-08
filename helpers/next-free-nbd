@@ -1,0 +1,9 @@
+#!/bin/sh
+USED=$(used-nbd | xargs -r -I{} printf -- '-e {} ')
+
+privileged-container find /dev -name 'nbd*' \
+| xargs -r -n1 basename \
+| ( [[ "$USED" ]] && grep -v $USED || cat ) \
+| sort -n \
+| shuf \
+| head -1

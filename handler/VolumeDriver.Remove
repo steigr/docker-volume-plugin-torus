@@ -1,0 +1,14 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+trap 'printf "{ \"Err\": \"removal of %s failed: %s \"}\n" "${VOLUMEDRIVER_NAME}" "${ERROR}"' exit
+
+_remove() {
+  ERROR=$(detach $VOLUMEDRIVER_NAME $NBD 2>&1 | tr '\n' ' ')
+  ERROR=$(torusctl --etcd=${TORUS_ETCD} volume delete "$VOLUMEDRIVER_NAME" 2>&1 | tr '\n' ' ')
+}
+
+ERROR=$(_remove)
+
+printf '{}\n'
+trap - exit

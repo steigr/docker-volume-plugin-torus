@@ -1,0 +1,22 @@
+#!/bin/sh
+[[ $TRACE ]] && set -x
+set -eo pipefail
+trap "printf '{ \"Err\": \"creation of %s failed \"}\n' ${VOLUMEDRIVER_NAME}" exit
+_volumes() {
+  torusctl --etcd=${TORUS_ETCD} volume list \
+  | while read -r line; do \
+    echo $line; \
+  done \
+  | grep -v "^VOLUME NAME SIZE TYPE$" \
+  | awk '{print $1}'  
+}
+
+_list() {
+  for volume in $(_volumes); do
+    printf '{"Name":"%s","Mountpoint":"%s"}\n' "$volume" "$(mountpoint-of $volume)"
+  done | paste -s -d, -
+}
+
+OUTPUT="{\"Volumes\":[$(_list)]}"
+trap - exit
+echo $OUTPUT

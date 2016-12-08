@@ -1,0 +1,10 @@
+#!/bin/sh
+privileged-container pidof torusblk \
+| tr ' ' '\n' \
+| while read pid; do
+  cmdline=$(privileged-container cat /proc/$pid/cmdline | tr '\0' '\n')
+  printf "$cmdline" \
+  | grep -q "^$1$" || continue
+  printf "$cmdline" \
+  | grep "^/dev/nbd"
+done

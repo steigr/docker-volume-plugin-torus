@@ -1,0 +1,7 @@
+#!/bin/sh
+
+privileged-container cat /host/run/runc/$(container-id)/state.json \
+| jq -r '.init_process_pid' \
+| head -1 \
+| xargs -r -n1 -I{} privileged-container cat /proc/{}/stat \
+| awk '{print $4}'
