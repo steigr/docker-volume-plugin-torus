@@ -47,7 +47,7 @@ torus_member=$(docker ps --quiet --filter=label=com.docker.swarm.service.name=to
 docker exec $torus_member torusctl --etcd=etcd:2379 list-peers
 
 # start torus-volume-driver
-docker pull steigr/docker-volume-plugin-torus:v0.1.0 && \
+docker pull steigr/docker-volume-plugin-torus:v0.1.1 && \
 docker service create \
 --mode=global \
 --mount=type=bind,source=/var/run,destination=/var/run \
@@ -55,7 +55,7 @@ docker service create \
 --name=torusblk \
 --env=TORUS_ETCD=etcd:2379 \
 --env=DRIVER_NAME=torus \
-steigr/docker-volume-plugin-torus:v0.1.0
+steigr/docker-volume-plugin-torus:v0.1.1
 
 docker pull minio/minio && \
 docker service create \
