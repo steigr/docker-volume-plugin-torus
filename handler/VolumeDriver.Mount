@@ -10,6 +10,7 @@ export NBD=${NBD:-/dev/$(next-free-nbd)}
 _run() {
   ERROR=$(attach $VOLUMEDRIVER_NAME $NBD 2>&1 | tr '\n' ' ')
   sleep 1
+  ERROR=$(in-parent mkdir -p $MOUNTS/$VOLUMEDRIVER_NAME 2>&1 | tr '\n' ' ')
   ERROR=$(in-parent mount -o discard $NBD $MOUNTS/$VOLUMEDRIVER_NAME 2>&1 | tr '\n' ' ')
 }
 
